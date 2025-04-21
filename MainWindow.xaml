@@ -4,9 +4,61 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HarmonicOscillator"
+        xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Pendulum Simulation" Height="600" Width="900">
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Input Panel -->
+        <Grid Grid.Row="0" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Weight Input -->
+            <Label Grid.Column="0" Content="Weight (kg):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Grid.Column="1" x:Name="txtWeight" Text="1.0" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            
+            <!-- Length Input -->
+            <Label Grid.Column="2" Content="Length (m):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Grid.Column="3" x:Name="txtLength" Text="1.0" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            
+            <!-- Initial Angle -->
+            <Label Grid.Column="4" Content="Initial Angle (°):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Grid.Column="5" x:Name="txtInitialAngle" Text="30" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            
+            <!-- Simulation Time -->
+            <Label Grid.Column="0" Content="Simulation Time (s):" VerticalAlignment="Center" Margin="0,30,5,0" Grid.ColumnSpan="2"/>
+            <TextBox Grid.Column="1" x:Name="txtSimTime" Text="10" Margin="0,30,10,0" VerticalAlignment="Center"/>
+            
+            <!-- Calculate Button -->
+            <Button Grid.Column="5" Content="Calculate" x:Name="btnCalculate" Click="BtnCalculate_Click" 
+                    Margin="0,30,0,0" Padding="10,5" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        </Grid>
+        
+        <!-- Chart Panel -->
+        <TabControl Grid.Row="1" Margin="10">
+            <TabItem Header="Displacement">
+                <ScottPlot:WpfPlot x:Name="plotDisplacement"/>
+            </TabItem>
+            <TabItem Header="Velocity">
+                <ScottPlot:WpfPlot x:Name="plotVelocity"/>
+            </TabItem>
+            <TabItem Header="Acceleration">
+                <ScottPlot:WpfPlot x:Name="plotAcceleration"/>
+            </TabItem>
+            <TabItem Header="Combined">
+                <ScottPlot:WpfPlot x:Name="plotCombined"/>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>
