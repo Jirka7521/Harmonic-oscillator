@@ -6,75 +6,167 @@
         xmlns:local="clr-namespace:HarmonicOscillator"
         xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
-        Title="Pendulum Simulation" Height="600" Width="900">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        Title="Pendulum Simulation" 
+        Height="700" Width="1000"
+        Background="#F5F5F5"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <!-- Modern styles for controls -->
+        <Style TargetType="TextBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Width" Value="100"/>
+        </Style>
         
-        <!-- Input Panel -->
-        <Grid Grid.Row="0" Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            
-            <!-- Weight Input -->
-            <Label Grid.Column="0" Content="Weight (kg):" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Grid.Column="1" x:Name="txtWeight" Text="1.0" Margin="0,0,10,0" VerticalAlignment="Center"/>
-            
-            <!-- Length Input -->
-            <Label Grid.Column="2" Content="Length (m):" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Grid.Column="3" x:Name="txtLength" Text="1.0" Margin="0,0,10,0" VerticalAlignment="Center"/>
-            
-            <!-- Initial Angle -->
-            <Label Grid.Column="4" Content="Initial Angle (°):" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Grid.Column="5" x:Name="txtInitialAngle" Text="30" Margin="0,0,10,0" VerticalAlignment="Center"/>
-            
-            <!-- Simulation Time -->
-            <Label Grid.Column="0" Content="Simulation Time (s):" VerticalAlignment="Center" Margin="0,30,5,0" Grid.ColumnSpan="2"/>
-            <TextBox Grid.Column="1" x:Name="txtSimTime" Text="10" Margin="0,30,10,0" VerticalAlignment="Center"/>
-            
-            <!-- Calculate Button -->
-            <Button Grid.Column="5" Content="Calculate" x:Name="btnCalculate" Click="BtnCalculate_Click" 
-                    Margin="0,30,0,0" Padding="10,5" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        </Grid>
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0,0,5,0"/>
+        </Style>
         
-        <!-- Chart Panel -->
-        <TabControl Grid.Row="1" Margin="10">
-            <TabItem Header="Displacement">
-                <ScottPlot:WpfPlot x:Name="plotDisplacement"/>
-            </TabItem>
-            <TabItem Header="Velocity">
-                <ScottPlot:WpfPlot x:Name="plotVelocity"/>
-            </TabItem>
-            <TabItem Header="Acceleration">
-                <ScottPlot:WpfPlot x:Name="plotAcceleration"/>
-            </TabItem>
-            <TabItem Header="Combined">
+        <Style TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Background" Value="#4C84FF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3A6EDA"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style TargetType="CheckBox">
+            <Setter Property="Margin" Value="0,0,15,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+    
+    <Border Padding="20" Background="White" CornerRadius="8" Margin="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.1"/>
+        </Border.Effect>
+        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Header and Inputs Panel -->
+            <Border Grid.Row="0" 
+                    Padding="20" 
+                    Background="#F9F9F9" 
+                    CornerRadius="8" 
+                    Margin="0,0,0,15">
+                
+                <StackPanel>
+                    <TextBlock Text="Pendulum Parameters" 
+                               FontSize="20" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,20" 
+                               Foreground="#333333"/>
+                    
+                    <!-- Single row for all inputs -->
+                    <DockPanel LastChildFill="False" Margin="0,0,0,15">
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                            <Label Content="Weight (kg):" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtWeight" Text="10" Margin="0,0,15,0"/>
+                            
+                            <Label Content="Length (m):" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtLength" Text="10" Margin="0,0,15,0"/>
+                            
+                            <Label Content="Initial Angle (°):" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtInitialAngle" Text="30" Margin="0,0,15,0"/>
+                            
+                            <Label Content="Simulation Time (s):" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtSimTime" Text="10" Margin="0,0,15,0"/>
+                        </StackPanel>
+                        
+                        <Button DockPanel.Dock="Right"
+                                Content="CALCULATE" 
+                                x:Name="btnCalculate" 
+                                Click="BtnCalculate_Click"/>
+                    </DockPanel>
+                    
+                    <!-- Results display -->
+                    <Border Background="#EFF8FF" 
+                            BorderBrush="#BFD9F9" 
+                            BorderThickness="1" 
+                            CornerRadius="4" 
+                            Padding="15,10" 
+                            Margin="0,0,0,0">
+                        <DockPanel>
+                            <TextBlock Text="RESULTS:" 
+                                       FontWeight="Bold" 
+                                       Foreground="#2C5282"
+                                       DockPanel.Dock="Left"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,10,0"/>
+                            <TextBlock x:Name="txtResults" 
+                                       Text="Calculated values will appear here"
+                                       Foreground="#2A4365"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- Chart Panel -->
+            <Border Grid.Row="1" 
+                    Background="#F9F9F9" 
+                    CornerRadius="8" 
+                    Padding="20">
+                
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     
-                    <!-- Checkboxes for toggling velocity and acceleration -->
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,5,0,10">
-                        <CheckBox x:Name="chkVelocity" Content="Show Velocity" Margin="5,0,10,0" IsChecked="True"
-                                  Checked="ChartOption_Changed" Unchecked="ChartOption_Changed" />
-                        <CheckBox x:Name="chkAcceleration" Content="Show Acceleration" Margin="5,0,0,0" IsChecked="True"
-                                  Checked="ChartOption_Changed" Unchecked="ChartOption_Changed" />
-                    </StackPanel>
+                    <!-- Chart Controls -->
+                    <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,15">
+                        <TextBlock Text="Pendulum Motion" 
+                                   FontSize="18" 
+                                   FontWeight="SemiBold" 
+                                   VerticalAlignment="Center" 
+                                   Foreground="#333333"/>
+                        
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <CheckBox x:Name="chkVelocity" 
+                                      Content="Show Velocity" 
+                                      IsChecked="True"
+                                      Checked="ChartOption_Changed" 
+                                      Unchecked="ChartOption_Changed"/>
+                            
+                            <CheckBox x:Name="chkAcceleration" 
+                                      Content="Show Acceleration" 
+                                      IsChecked="True"
+                                      Checked="ChartOption_Changed" 
+                                      Unchecked="ChartOption_Changed"/>
+                        </StackPanel>
+                    </DockPanel>
                     
-                    <!-- Combined Plot -->
-                    <ScottPlot:WpfPlot x:Name="plotCombined" Grid.Row="1"/>
+                    <!-- Plot with Border -->
+                    <Border Grid.Row="1" 
+                            Background="White" 
+                            CornerRadius="6" 
+                            BorderBrush="#EEEEEE" 
+                            BorderThickness="1"
+                            Padding="10">
+                        <ScottPlot:WpfPlot x:Name="plotCombined"/>
+                    </Border>
                 </Grid>
-            </TabItem>
-        </TabControl>
-    </Grid>
+            </Border>
+        </Grid>
+    </Border>
 </Window>

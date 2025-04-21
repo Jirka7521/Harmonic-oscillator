@@ -97,11 +97,18 @@ namespace HarmonicOscillator
                 // Update plot
                 UpdatePlot();
 
-                MessageBox.Show($"Pendulum period: {period:F2} seconds", "Calculation Results", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Display calculation results in the results text block
+                txtResults.Text = $"Pendulum period: {period:F2} seconds | Max displacement: {initialAngle:F2} rad | Angular frequency: {angularFrequency:F2} rad/s";
+                txtResults.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(42, 67, 101)); // Reset to normal color (#2A4365)
             }
             catch (Exception ex)
             {
+                // Show errors as popup message boxes
                 MessageBox.Show($"Error: {ex.Message}", "Calculation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Clear or reset the results text
+                txtResults.Text = "Calculation failed. Please check your inputs.";
+                txtResults.Foreground = new SolidColorBrush(System.Windows.Media.Colors.Red);
             }
         }
 
