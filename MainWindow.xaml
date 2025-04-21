@@ -57,7 +57,23 @@
                 <ScottPlot:WpfPlot x:Name="plotAcceleration"/>
             </TabItem>
             <TabItem Header="Combined">
-                <ScottPlot:WpfPlot x:Name="plotCombined"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Checkboxes for toggling velocity and acceleration -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,5,0,10">
+                        <CheckBox x:Name="chkVelocity" Content="Show Velocity" Margin="5,0,10,0" IsChecked="True"
+                                  Checked="ChartOption_Changed" Unchecked="ChartOption_Changed" />
+                        <CheckBox x:Name="chkAcceleration" Content="Show Acceleration" Margin="5,0,0,0" IsChecked="True"
+                                  Checked="ChartOption_Changed" Unchecked="ChartOption_Changed" />
+                    </StackPanel>
+                    
+                    <!-- Combined Plot -->
+                    <ScottPlot:WpfPlot x:Name="plotCombined" Grid.Row="1"/>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

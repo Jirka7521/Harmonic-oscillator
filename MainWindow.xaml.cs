@@ -21,6 +21,12 @@ namespace HarmonicOscillator
         // Constants
         private const double g = 9.81; // Acceleration due to gravity (m/s²)
 
+        // Store calculated data
+        private double[] timePoints;
+        private double[] displacement;
+        private double[] velocity;
+        private double[] acceleration;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -31,27 +37,16 @@ namespace HarmonicOscillator
 
         private void InitializePlots()
         {
-            // Set up plots with common styling
-            var plots = new[] { plotDisplacement, plotVelocity, plotAcceleration, plotCombined };
+            // Set up the combined plot
+            plotCombined.Plot.Title("Pendulum Motion");
+            plotCombined.Plot.XLabel("Time (s)");
+            plotCombined.Plot.YLabel("Displacement (rad)"); // Default left Y axis label
+            plotCombined.Plot.Grid.IsVisible = true;
 
-            foreach (var plot in plots)
-            {
-                plot.Plot.Title(null);
-                plot.Plot.XLabel("Time (s)");
-                plot.Plot.Grid.IsVisible = true;
-            }
+            // Set default styling for the plot
+            plotCombined.Plot.Legend.Location = ScottPlot.Alignment.UpperRight;
 
-            // Set specific Y labels
-            plotDisplacement.Plot.YLabel("Angular Displacement (rad)");
-            plotVelocity.Plot.YLabel("Angular Velocity (rad/s)");
-            plotAcceleration.Plot.YLabel("Angular Acceleration (rad/s²)");
-            plotCombined.Plot.YLabel("Value");
-
-            // Refresh all plots
-            foreach (var plot in plots)
-            {
-                plot.Refresh();
-            }
+            plotCombined.Refresh();
         }
 
         private void BtnCalculate_Click(object sender, RoutedEventArgs e)
@@ -80,10 +75,10 @@ namespace HarmonicOscillator
                 // For small angles, the motion is approximately simple harmonic
                 // Generate time points and solution data
                 int numPoints = 1000;
-                double[] timePoints = new double[numPoints];
-                double[] displacement = new double[numPoints];
-                double[] velocity = new double[numPoints];
-                double[] acceleration = new double[numPoints];
+                timePoints = new double[numPoints];
+                displacement = new double[numPoints];
+                velocity = new double[numPoints];
+                acceleration = new double[numPoints];
 
                 double timeStep = simulationTime / (numPoints - 1);
                 double angularFrequency = Math.Sqrt(g / length);
@@ -99,8 +94,8 @@ namespace HarmonicOscillator
                     acceleration[i] = -initialAngle * angularFrequency * angularFrequency * Math.Cos(angularFrequency * t);
                 }
 
-                // Update plots
-                UpdatePlots(timePoints, displacement, velocity, acceleration);
+                // Update plot
+                UpdatePlot();
 
                 MessageBox.Show($"Pendulum period: {period:F2} seconds", "Calculation Results", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -110,40 +105,72 @@ namespace HarmonicOscillator
             }
         }
 
-        private void UpdatePlots(double[] timePoints, double[] displacement, double[] velocity, double[] acceleration)
+        private void ChartOption_Changed(object sender, RoutedEventArgs e)
         {
-            // Clear previous plots
-            plotDisplacement.Plot.Clear();
-            plotVelocity.Plot.Clear();
-            plotAcceleration.Plot.Clear();
-            plotCombined.Plot.Clear();
+            // Only update the plot if we have data
+            if (timePoints != null && displacement != null && velocity != null && acceleration != null)
+            {
+                UpdatePlot();
+            }
+        }
 
-            // Add data to individual plots with explicit ScottPlot.Color usage
-            plotDisplacement.Plot.Add.Scatter(timePoints, displacement, color: ScottPlot.Color.FromColor(System.Drawing.Color.Red));
-            plotVelocity.Plot.Add.Scatter(timePoints, velocity, color: ScottPlot.Color.FromColor(System.Drawing.Color.Blue));
-            plotAcceleration.Plot.Add.Scatter(timePoints, acceleration, color: ScottPlot.Color.FromColor(System.Drawing.Color.Green));
+        private void UpdatePlot()
+        {
+            // Clear previous plot completely
+            plotCombined.Reset();
 
-            // Add all data to combined plot with labels
-            var dispScatter = plotCombined.Plot.Add.Scatter(timePoints, displacement, color: ScottPlot.Color.FromColor(System.Drawing.Color.Red));
-            var velScatter = plotCombined.Plot.Add.Scatter(timePoints, velocity, color: ScottPlot.Color.FromColor(System.Drawing.Color.Blue));
-            var accScatter = plotCombined.Plot.Add.Scatter(timePoints, acceleration, color: ScottPlot.Color.FromColor(System.Drawing.Color.Green));
+            // Calculate the sample rate for signal plotting
+            double sampleRate = 1.0 / (timePoints[1] - timePoints[0]);
 
-            dispScatter.Label = "Displacement";
-            velScatter.Label = "Velocity";
-            accScatter.Label = "Acceleration";
 
-            plotCombined.Plot.ShowLegend();
+            // Always show displacement on primary Y-axis (left)
+            var dispAxis = plotCombined.Plot.Axes.AddLeftAxis();
+            dispAxis.Label.Text = "Displacement [rad]";
 
-            // Auto-scale axis limits
-            plotDisplacement.Plot.Axes.AutoScale();
-            plotVelocity.Plot.Axes.AutoScale();
-            plotAcceleration.Plot.Axes.AutoScale();
+            // Use the original data but with X positions from scaledTimePoints
+            var dispLine = plotCombined.Plot.Add.Scatter(timePoints, displacement);
+            dispLine.Axes.XAxis = plotCombined.Plot.Axes.Bottom;
+            dispLine.Axes.YAxis = dispAxis;
+            dispLine.LegendText = "Displacement";
+            dispLine.LineWidth = 2;
+
+            // Velocity on secondary Y-axis (right) if selected
+            if (chkVelocity.IsChecked == true)
+            {
+                var velAxis = plotCombined.Plot.Axes.AddRightAxis();
+                velAxis.Label.Text = "Velocity [rad/s]";
+
+                var velLine = plotCombined.Plot.Add.Scatter(timePoints, velocity);
+                velLine.Axes.XAxis = plotCombined.Plot.Axes.Bottom;
+                velLine.Axes.YAxis = velAxis;
+                velLine.LegendText = "Velocity";
+                velLine.LineWidth = 2;
+            }
+
+            // Acceleration on secondary Y-axis (right) if selected
+            if (chkAcceleration.IsChecked == true)
+            {
+                var accelAxis = plotCombined.Plot.Axes.AddRightAxis();
+                accelAxis.Label.Text = "Acceleration [rad/s²]";
+
+                var accelLine = plotCombined.Plot.Add.Scatter(timePoints, acceleration);
+                accelLine.Axes.XAxis = plotCombined.Plot.Axes.Bottom;
+                accelLine.Axes.YAxis = accelAxis;
+                accelLine.LegendText = "Acceleration";
+                accelLine.LineWidth = 2;
+            }
+
+            // Configure plot appearance
+            plotCombined.Plot.Title("Pendulum Motion");
+            plotCombined.Plot.XLabel("Time [s]");  // Updated label to indicate scaling
+
+            // Show legend only if more than one plot is visible
+            plotCombined.Plot.Legend.IsVisible = chkVelocity.IsChecked == true || chkAcceleration.IsChecked == true;
+
+            // Ensure appropriate scaling
             plotCombined.Plot.Axes.AutoScale();
 
-            // Refresh all plots
-            plotDisplacement.Refresh();
-            plotVelocity.Refresh();
-            plotAcceleration.Refresh();
+            // Refresh to apply changes
             plotCombined.Refresh();
         }
     }
