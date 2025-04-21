@@ -38,9 +38,9 @@ namespace HarmonicOscillator
         private void InitializePlots()
         {
             // Set up the combined plot
-            plotCombined.Plot.Title("Pendulum Motion");
-            plotCombined.Plot.XLabel("Time (s)");
-            plotCombined.Plot.YLabel("Displacement (rad)"); // Default left Y axis label
+            plotCombined.Plot.Title("Pohyb kyvadla");
+            plotCombined.Plot.XLabel("Čas (s)");
+            plotCombined.Plot.YLabel("Výchylka (rad)"); // Default left Y axis label
             plotCombined.Plot.Grid.IsVisible = true;
 
             // Set default styling for the plot
@@ -55,16 +55,16 @@ namespace HarmonicOscillator
             {
                 // Parse input values
                 if (!double.TryParse(txtWeight.Text, out double mass))
-                    throw new ArgumentException("Invalid weight value.");
+                    throw new ArgumentException("Neplatná hodnota hmotnosti.");
 
                 if (!double.TryParse(txtLength.Text, out double length) || length <= 0)
-                    throw new ArgumentException("Length must be a positive number.");
+                    throw new ArgumentException("Délka musí být kladné číslo.");
 
                 if (!double.TryParse(txtInitialAngle.Text, out double initialAngleDegrees))
-                    throw new ArgumentException("Invalid initial angle value.");
+                    throw new ArgumentException("Neplatná hodnota počátečního úhlu.");
 
                 if (!double.TryParse(txtSimTime.Text, out double simulationTime) || simulationTime <= 0)
-                    throw new ArgumentException("Simulation time must be a positive number.");
+                    throw new ArgumentException("Doba simulace musí být kladné číslo.");
 
                 // Convert angle from degrees to radians
                 double initialAngle = initialAngleDegrees * Math.PI / 180.0;
@@ -74,7 +74,7 @@ namespace HarmonicOscillator
 
                 // For small angles, the motion is approximately simple harmonic
                 // Generate time points and solution data
-                int numPoints = 1000;
+                int numPoints = 10000;
                 timePoints = new double[numPoints];
                 displacement = new double[numPoints];
                 velocity = new double[numPoints];
@@ -98,16 +98,16 @@ namespace HarmonicOscillator
                 UpdatePlot();
 
                 // Display calculation results in the results text block
-                txtResults.Text = $"Pendulum period: {period:F2} seconds | Max displacement: {initialAngle:F2} rad | Angular frequency: {angularFrequency:F2} rad/s";
+                txtResults.Text = $"Perioda kyvadla: {period:F2} sekund | Maximální výchylka: {initialAngle:F2} rad | Úhlová frekvence: {angularFrequency:F2} rad/s";
                 txtResults.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(42, 67, 101)); // Reset to normal color (#2A4365)
             }
             catch (Exception ex)
             {
                 // Show errors as popup message boxes
-                MessageBox.Show($"Error: {ex.Message}", "Calculation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Chyba: {ex.Message}", "Chyba výpočtu", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Clear or reset the results text
-                txtResults.Text = "Calculation failed. Please check your inputs.";
+                txtResults.Text = "Výpočet selhal. Zkontrolujte vstupní hodnoty.";
                 txtResults.Foreground = new SolidColorBrush(System.Windows.Media.Colors.Red);
             }
         }
@@ -132,25 +132,25 @@ namespace HarmonicOscillator
 
             // Always show displacement on primary Y-axis (left)
             var dispAxis = plotCombined.Plot.Axes.AddLeftAxis();
-            dispAxis.Label.Text = "Displacement [rad]";
+            dispAxis.Label.Text = "Výchylka [rad]";
 
             // Use the original data but with X positions from scaledTimePoints
             var dispLine = plotCombined.Plot.Add.Scatter(timePoints, displacement);
             dispLine.Axes.XAxis = plotCombined.Plot.Axes.Bottom;
             dispLine.Axes.YAxis = dispAxis;
-            dispLine.LegendText = "Displacement";
+            dispLine.LegendText = "Výchylka";
             dispLine.LineWidth = 2;
 
             // Velocity on secondary Y-axis (right) if selected
             if (chkVelocity.IsChecked == true)
             {
                 var velAxis = plotCombined.Plot.Axes.AddRightAxis();
-                velAxis.Label.Text = "Velocity [rad/s]";
+                velAxis.Label.Text = "Rychlost [rad/s]";
 
                 var velLine = plotCombined.Plot.Add.Scatter(timePoints, velocity);
                 velLine.Axes.XAxis = plotCombined.Plot.Axes.Bottom;
                 velLine.Axes.YAxis = velAxis;
-                velLine.LegendText = "Velocity";
+                velLine.LegendText = "Rychlost";
                 velLine.LineWidth = 2;
             }
 
@@ -158,18 +158,18 @@ namespace HarmonicOscillator
             if (chkAcceleration.IsChecked == true)
             {
                 var accelAxis = plotCombined.Plot.Axes.AddRightAxis();
-                accelAxis.Label.Text = "Acceleration [rad/s²]";
+                accelAxis.Label.Text = "Zrychlení [rad/s²]";
 
                 var accelLine = plotCombined.Plot.Add.Scatter(timePoints, acceleration);
                 accelLine.Axes.XAxis = plotCombined.Plot.Axes.Bottom;
                 accelLine.Axes.YAxis = accelAxis;
-                accelLine.LegendText = "Acceleration";
+                accelLine.LegendText = "Zrychlení";
                 accelLine.LineWidth = 2;
             }
 
             // Configure plot appearance
-            plotCombined.Plot.Title("Pendulum Motion");
-            plotCombined.Plot.XLabel("Time [s]");  // Updated label to indicate scaling
+            plotCombined.Plot.Title("Pohyb kyvadla");
+            plotCombined.Plot.XLabel("Čas [s]");  // Updated label to indicate scaling
 
             // Show legend only if more than one plot is visible
             plotCombined.Plot.Legend.IsVisible = chkVelocity.IsChecked == true || chkAcceleration.IsChecked == true;

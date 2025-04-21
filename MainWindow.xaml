@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:HarmonicOscillator"
         xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
         mc:Ignorable="d"
-        Title="Pendulum Simulation" 
-        Height="700" Width="1000"
+        Title="Simulace kyvadla" 
+        Height="700" Width="1044"
         Background="#F5F5F5"
         WindowStartupLocation="CenterScreen">
     
@@ -70,7 +70,7 @@
                     Margin="0,0,0,15">
                 
                 <StackPanel>
-                    <TextBlock Text="Pendulum Parameters" 
+                    <TextBlock Text="Parametry kyvadla" 
                                FontSize="20" 
                                FontWeight="Bold" 
                                Margin="0,0,0,20" 
@@ -79,21 +79,21 @@
                     <!-- Single row for all inputs -->
                     <DockPanel LastChildFill="False" Margin="0,0,0,15">
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                            <Label Content="Weight (kg):" VerticalAlignment="Center"/>
+                            <Label Content="Hmotnost (kg):" VerticalAlignment="Center"/>
                             <TextBox x:Name="txtWeight" Text="10" Margin="0,0,15,0"/>
                             
-                            <Label Content="Length (m):" VerticalAlignment="Center"/>
+                            <Label Content="Délka (m):" VerticalAlignment="Center"/>
                             <TextBox x:Name="txtLength" Text="10" Margin="0,0,15,0"/>
                             
-                            <Label Content="Initial Angle (°):" VerticalAlignment="Center"/>
+                            <Label Content="Počáteční úhel (°):" VerticalAlignment="Center"/>
                             <TextBox x:Name="txtInitialAngle" Text="30" Margin="0,0,15,0"/>
                             
-                            <Label Content="Simulation Time (s):" VerticalAlignment="Center"/>
+                            <Label Content="Doba simulace (s):" VerticalAlignment="Center"/>
                             <TextBox x:Name="txtSimTime" Text="10" Margin="0,0,15,0"/>
                         </StackPanel>
                         
                         <Button DockPanel.Dock="Right"
-                                Content="CALCULATE" 
+                                Content="VYPOČÍTAT" 
                                 x:Name="btnCalculate" 
                                 Click="BtnCalculate_Click"/>
                     </DockPanel>
@@ -106,14 +106,14 @@
                             Padding="15,10" 
                             Margin="0,0,0,0">
                         <DockPanel>
-                            <TextBlock Text="RESULTS:" 
+                            <TextBlock Text="VÝSLEDKY:" 
                                        FontWeight="Bold" 
                                        Foreground="#2C5282"
                                        DockPanel.Dock="Left"
                                        VerticalAlignment="Center"
                                        Margin="0,0,10,0"/>
                             <TextBlock x:Name="txtResults" 
-                                       Text="Calculated values will appear here"
+                                       Text="Vypočítané hodnoty se zobrazí zde"
                                        Foreground="#2A4365"
                                        VerticalAlignment="Center"/>
                         </DockPanel>
@@ -135,7 +135,7 @@
                     
                     <!-- Chart Controls -->
                     <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,15">
-                        <TextBlock Text="Pendulum Motion" 
+                        <TextBlock Text="Pohyb kyvadla" 
                                    FontSize="18" 
                                    FontWeight="SemiBold" 
                                    VerticalAlignment="Center" 
@@ -143,13 +143,13 @@
                         
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                             <CheckBox x:Name="chkVelocity" 
-                                      Content="Show Velocity" 
+                                      Content="Zobrazit rychlost" 
                                       IsChecked="True"
                                       Checked="ChartOption_Changed" 
                                       Unchecked="ChartOption_Changed"/>
                             
                             <CheckBox x:Name="chkAcceleration" 
-                                      Content="Show Acceleration" 
+                                      Content="Zobrazit zrychlení" 
                                       IsChecked="True"
                                       Checked="ChartOption_Changed" 
                                       Unchecked="ChartOption_Changed"/>
