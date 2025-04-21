@@ -14,134 +14,94 @@ using ScottPlot;
 namespace HarmonicOscillator
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Simulace matematického kyvadla v harmonickém pohybu
+    /// Používá aproximaci malých úhlů pro výpočet pohybu kyvadla
     /// </summary>
     public partial class MainWindow : Window
     {
-        // Constants
-        private const double g = 9.81; // Acceleration due to gravity (m/s²)
+        #region Konstanty a proměnné
 
-        // Store calculated data
+        /// <summary>
+        /// Gravitační zrychlení (m/s²)
+        /// </summary>
+        private const double g = 9.81;
+
+        /// <summary>
+        /// Pole pro ukládání časových bodů simulace
+        /// </summary>
         private double[] timePoints;
+
+        /// <summary>
+        /// Pole pro ukládání úhlové výchylky v čase
+        /// </summary>
         private double[] displacement;
+
+        /// <summary>
+        /// Pole pro ukládání úhlové rychlosti v čase
+        /// </summary>
         private double[] velocity;
+
+        /// <summary>
+        /// Pole pro ukládání úhlového zrychlení v čase
+        /// </summary>
         private double[] acceleration;
 
+        #endregion
+
+        /// <summary>
+        /// Inicializace hlavního okna aplikace
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
-
-            // Initialize plots with default styling
-            InitializePlots();
+            InitializePlots();  // Nastavení grafů s výchozím stylem
         }
 
+        #region Metody pro nastavení a aktualizaci grafů
+
+        /// <summary>
+        /// Inicializace grafu s výchozím nastavením
+        /// </summary>
         private void InitializePlots()
         {
-            // Set up the combined plot
+            // Nastavení titulku a popisků os
             plotCombined.Plot.Title("Pohyb kyvadla");
             plotCombined.Plot.XLabel("Čas (s)");
-            plotCombined.Plot.YLabel("Výchylka (rad)"); // Default left Y axis label
+            plotCombined.Plot.YLabel("Výchylka (rad)");
+
+            // Zapnutí mřížky pro lepší čitelnost
             plotCombined.Plot.Grid.IsVisible = true;
 
-            // Set default styling for the plot
+            // Nastavení pozice legendy
             plotCombined.Plot.Legend.Location = ScottPlot.Alignment.UpperRight;
 
+            // Aplikace nastavení
             plotCombined.Refresh();
         }
 
-        private void BtnCalculate_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Parse input values
-                if (!double.TryParse(txtWeight.Text, out double mass))
-                    throw new ArgumentException("Neplatná hodnota hmotnosti.");
-
-                if (!double.TryParse(txtLength.Text, out double length) || length <= 0)
-                    throw new ArgumentException("Délka musí být kladné číslo.");
-
-                if (!double.TryParse(txtInitialAngle.Text, out double initialAngleDegrees))
-                    throw new ArgumentException("Neplatná hodnota počátečního úhlu.");
-
-                if (!double.TryParse(txtSimTime.Text, out double simulationTime) || simulationTime <= 0)
-                    throw new ArgumentException("Doba simulace musí být kladné číslo.");
-
-                // Convert angle from degrees to radians
-                double initialAngle = initialAngleDegrees * Math.PI / 180.0;
-
-                // Calculate pendulum period
-                double period = 2 * Math.PI * Math.Sqrt(length / g);
-
-                // For small angles, the motion is approximately simple harmonic
-                // Generate time points and solution data
-                int numPoints = 10000;
-                timePoints = new double[numPoints];
-                displacement = new double[numPoints];
-                velocity = new double[numPoints];
-                acceleration = new double[numPoints];
-
-                double timeStep = simulationTime / (numPoints - 1);
-                double angularFrequency = Math.Sqrt(g / length);
-
-                for (int i = 0; i < numPoints; i++)
-                {
-                    double t = i * timeStep;
-                    timePoints[i] = t;
-
-                    // For small angles, simple harmonic motion is a good approximation
-                    displacement[i] = initialAngle * Math.Cos(angularFrequency * t);
-                    velocity[i] = -initialAngle * angularFrequency * Math.Sin(angularFrequency * t);
-                    acceleration[i] = -initialAngle * angularFrequency * angularFrequency * Math.Cos(angularFrequency * t);
-                }
-
-                // Update plot
-                UpdatePlot();
-
-                // Display calculation results in the results text block
-                txtResults.Text = $"Perioda kyvadla: {period:F2} sekund | Maximální výchylka: {initialAngle:F2} rad | Úhlová frekvence: {angularFrequency:F2} rad/s";
-                txtResults.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(42, 67, 101)); // Reset to normal color (#2A4365)
-            }
-            catch (Exception ex)
-            {
-                // Show errors as popup message boxes
-                MessageBox.Show($"Chyba: {ex.Message}", "Chyba výpočtu", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                // Clear or reset the results text
-                txtResults.Text = "Výpočet selhal. Zkontrolujte vstupní hodnoty.";
-                txtResults.Foreground = new SolidColorBrush(System.Windows.Media.Colors.Red);
-            }
-        }
-
-        private void ChartOption_Changed(object sender, RoutedEventArgs e)
-        {
-            // Only update the plot if we have data
-            if (timePoints != null && displacement != null && velocity != null && acceleration != null)
-            {
-                UpdatePlot();
-            }
-        }
-
+        /// <summary>
+        /// Aktualizuje graf podle aktuálních dat a nastavení uživatele
+        /// </summary>
         private void UpdatePlot()
         {
-            // Clear previous plot completely
+            // Kompletní reset grafu před vykreslením nových dat
             plotCombined.Reset();
 
-            // Calculate the sample rate for signal plotting
+            // Výpočet vzorkovací frekvence pro vykreslování
             double sampleRate = 1.0 / (timePoints[1] - timePoints[0]);
 
-
-            // Always show displacement on primary Y-axis (left)
+            // --- Vykreslení výchylky (vždy na primární ose Y vlevo) ---
             var dispAxis = plotCombined.Plot.Axes.AddLeftAxis();
             dispAxis.Label.Text = "Výchylka [rad]";
 
-            // Use the original data but with X positions from scaledTimePoints
             var dispLine = plotCombined.Plot.Add.Scatter(timePoints, displacement);
             dispLine.Axes.XAxis = plotCombined.Plot.Axes.Bottom;
             dispLine.Axes.YAxis = dispAxis;
             dispLine.LegendText = "Výchylka";
             dispLine.LineWidth = 2;
+            dispLine.Color = System.Drawing.Color.FromArgb(0, 120, 215);  // Modrá barva pro výchylku
 
-            // Velocity on secondary Y-axis (right) if selected
+            // --- Vykreslení rychlosti na pravé ose Y, pokud je zvolena ---
             if (chkVelocity.IsChecked == true)
             {
                 var velAxis = plotCombined.Plot.Axes.AddRightAxis();
@@ -152,9 +112,10 @@ namespace HarmonicOscillator
                 velLine.Axes.YAxis = velAxis;
                 velLine.LegendText = "Rychlost";
                 velLine.LineWidth = 2;
+                velLine.Color = System.Drawing.Color.FromArgb(232, 17, 35);  // Červená barva pro rychlost
             }
 
-            // Acceleration on secondary Y-axis (right) if selected
+            // --- Vykreslení zrychlení na pravé ose Y, pokud je zvoleno ---
             if (chkAcceleration.IsChecked == true)
             {
                 var accelAxis = plotCombined.Plot.Axes.AddRightAxis();
@@ -165,20 +126,137 @@ namespace HarmonicOscillator
                 accelLine.Axes.YAxis = accelAxis;
                 accelLine.LegendText = "Zrychlení";
                 accelLine.LineWidth = 2;
+                accelLine.Color = System.Drawing.Color.FromArgb(0, 153, 0);  // Zelená barva pro zrychlení
             }
 
-            // Configure plot appearance
+            // --- Finální nastavení grafu ---
             plotCombined.Plot.Title("Pohyb kyvadla");
-            plotCombined.Plot.XLabel("Čas [s]");  // Updated label to indicate scaling
+            plotCombined.Plot.XLabel("Čas [s]");
 
-            // Show legend only if more than one plot is visible
+            // Zobrazení legendy pouze pokud je více než jedna křivka
             plotCombined.Plot.Legend.IsVisible = chkVelocity.IsChecked == true || chkAcceleration.IsChecked == true;
 
-            // Ensure appropriate scaling
+            // Automatické nastavení měřítka os
             plotCombined.Plot.Axes.AutoScale();
 
-            // Refresh to apply changes
+            // Aplikace změn
             plotCombined.Refresh();
         }
+
+        #endregion
+
+        #region Události
+
+        /// <summary>
+        /// Obsluha události kliknutí na tlačítko výpočtu
+        /// Provádí výpočet pohybu kyvadla a aktualizuje graf
+        /// </summary>
+        /// <param name="sender">Objekt, který vyvolal událost</param>
+        /// <param name="e">Argumenty události</param>
+        private void BtnCalculate_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // --- Validace a načtení vstupních hodnot ---
+
+                // Hmotnost (kg)
+                if (!double.TryParse(txtWeight.Text, out double mass))
+                {
+                    throw new ArgumentException("Neplatná hodnota hmotnosti.");
+                }
+
+                // Délka kyvadla (m)
+                if (!double.TryParse(txtLength.Text, out double length) || length <= 0)
+                {
+                    throw new ArgumentException("Délka musí být kladné číslo.");
+                }
+
+                // Počáteční úhel ve stupních
+                if (!double.TryParse(txtInitialAngle.Text, out double initialAngleDegrees))
+                {
+                    throw new ArgumentException("Neplatná hodnota počátečního úhlu.");
+                }
+
+                // Doba simulace (s)
+                if (!double.TryParse(txtSimTime.Text, out double simulationTime) || simulationTime <= 0)
+                {
+                    throw new ArgumentException("Doba simulace musí být kladné číslo.");
+                }
+
+                // --- Převod jednotek a výpočet základních parametrů ---
+
+                // Převod úhlu ze stupňů na radiány
+                double initialAngle = initialAngleDegrees * Math.PI / 180.0;
+
+                // Výpočet periody kyvadla z fyzikálního vztahu
+                double period = 2 * Math.PI * Math.Sqrt(length / g);
+
+                // Úhlová frekvence kmitání
+                double angularFrequency = Math.Sqrt(g / length);
+
+                // --- Generování průběhu pohybu kyvadla ---
+
+                // Vysoké rozlišení bodů pro hladký graf
+                int numPoints = 10000;
+
+                // Alokace polí pro uložení dat
+                timePoints = new double[numPoints];
+                displacement = new double[numPoints];
+                velocity = new double[numPoints];
+                acceleration = new double[numPoints];
+
+                // Časový krok mezi jednotlivými body (s)
+                double timeStep = simulationTime / (numPoints - 1);
+
+                // Výpočet hodnot v jednotlivých časových bodech
+                for (int i = 0; i < numPoints; i++)
+                {
+                    double t = i * timeStep;
+                    timePoints[i] = t;
+
+                    // Pro malé úhly je pohyb přibližně harmonický
+                    displacement[i] = initialAngle * Math.Cos(angularFrequency * t);
+                    velocity[i] = -initialAngle * angularFrequency * Math.Sin(angularFrequency * t);
+                    acceleration[i] = -initialAngle * angularFrequency * angularFrequency * Math.Cos(angularFrequency * t);
+                }
+
+                // --- Aktualizace grafu a zobrazení výsledků ---
+                UpdatePlot();
+
+                // Zobrazení vypočtených charakteristik kyvadla
+                txtResults.Text = $"Perioda kyvadla: {period:F2} sekund | Maximální výchylka: {initialAngle:F2} rad | Úhlová frekvence: {angularFrequency:F2} rad/s";
+                txtResults.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(42, 67, 101));
+            }
+            catch (Exception ex)
+            {
+                // Zobrazení chybového dialogu při výskytu problému
+                MessageBox.Show(
+                    $"Chyba: {ex.Message}",
+                    "Chyba výpočtu",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                // Zobrazení chybové zprávy v panelu výsledků
+                txtResults.Text = "Výpočet selhal. Zkontrolujte vstupní hodnoty.";
+                txtResults.Foreground = new SolidColorBrush(System.Windows.Media.Colors.Red);
+            }
+        }
+
+        /// <summary>
+        /// Obsluha události při změně volby zobrazení grafu
+        /// </summary>
+        /// <param name="sender">Objekt, který vyvolal událost</param>
+        /// <param name="e">Argumenty události</param>
+        private void ChartOption_Changed(object sender, RoutedEventArgs e)
+        {
+            // Aktualizace grafu jen pokud již existují data
+            if (timePoints != null && displacement != null &&
+                velocity != null && acceleration != null)
+            {
+                UpdatePlot();
+            }
+        }
+
+        #endregion
     }
 }
